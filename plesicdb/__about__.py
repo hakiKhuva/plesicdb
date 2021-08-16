@@ -1,0 +1,5 @@
+__name__ = "PlesicDB"
+__version__ = "0.0.1"
+__author__ = "Harkishan Khuva"
+__author_email__ = "harkishankhuva02@gmail.com"
+__license__ = "MIT"
