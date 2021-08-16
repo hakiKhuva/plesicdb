@@ -16,7 +16,7 @@ Simple program
 
 Below is an example of how to import plesicdb and creating database and collection.
 
-```
+```python
 >>> from plesicdb import Plesic
 
 >>> pl = Plesic("/home/mydbs")   # directory to store all databases in it.
@@ -36,7 +36,7 @@ Insert record
 When you insert record in collection function will return `_id` of record.
 
 If `_id` provided in `dict` then it will be used else uuid4 function will be used.
-```
+```python
 >>> # Using users collection
 
 >>> insertdata = {
@@ -62,7 +62,7 @@ record id : 15c99800-f480-4099-948c-b6e409edcefd
 To insert multiple records
 --------------------------
 When you insert multiple records in collection function will return `_id list`.
-```
+```python
 >>> import random
 
 >>> insertdata = [
@@ -93,7 +93,7 @@ Search records
 When you search for record pass lambda function or regular function that returns true.
 
 To get all records call without passing function.
-```
+```python
 >>> users.find(lambda x:x["_id"] == '15c99800-f480-4099-948c-b6e409edcefd')
 
 >>> # To get all records - users.find()
@@ -112,7 +112,7 @@ If you want to clear all records from collection call without passing function.
 Pass lambda or regular function that returns true.
 
 Function will return list of `_id` of removed records.
-```
+```python
 >>> # truncate collection
 >>> users.remove()
 
@@ -131,7 +131,7 @@ Update records
 Update records will return `_id` of updated records.
 
 Pass lambda or regular function that returns true.
-```
+```python
 >>> users.update(lambda x:x["_id"] == 'd0d66f10-d50f-48fc-8779-ee2a12965b19',{"name" : "Stu vw"})
 ```
 ```
@@ -145,7 +145,7 @@ Update records - nested dict
 If you have added data in nested format then you can update it using `.`(dot) as shown below.
 
 If key doesn't exists it will be created.
-```
+```python
 >>> record = {
     "name" : "Haki",
     "info" : {
@@ -166,7 +166,7 @@ If key doesn't exists it will be created.
 Check record exists or not
 --------------------------
 This function will return 1 if exists else 0.
-```
+```python
 >>> records = [
     {
         "username" : "user1",
@@ -185,7 +185,7 @@ This function will return 1 if exists else 0.
 >>> users.insertMany(records)
 ```
 
-```
+```python
 >>> users.exists(lambda x:x["username"] == "user1")
 ```
 ```
@@ -193,7 +193,7 @@ This function will return 1 if exists else 0.
 1
 ```
 
-```
+```python
 >>> users.exists(lambda x:x["username"] == "user10")
 ```
 ```
@@ -206,7 +206,7 @@ This function will return 1 if exists else 0.
 Drop collection
 ---------------
 return 1 if dropped else 0
-```
+```python
 >>> db.drop("users")
 ```
 ```
@@ -220,7 +220,7 @@ Export database
 Export database to one JSON file.
 
 JSON file will be generated at path with db data.
-```
+```python
 >>> db.export("/home/mydbs/")
 ```
 
@@ -228,7 +228,7 @@ JSON file will be generated at path with db data.
 Import database
 ---------------
 Import database that exported before
-```
+```python
 >>> pl.IMPORT("/home/mydbs/myapp--7cf27d12adadbb2778e04b7a98097c84.json")
 ```
 
@@ -237,7 +237,7 @@ Import database that exported before
 Drop database
 -------------
 return 1 if dropped else 0
-```
+```python
 >>> pl.drop("myapp")
 ```
 ```
@@ -248,12 +248,12 @@ return 1 if dropped else 0
 Get info about your databases
 -----------------------------
 return database, memory, stats.json memory, collections, collection-chunks count, memory
-```
+```python
 >>> import json
 >>> print(json.dumps(pl.info(),indent=4))
 ```
 
-```
+```JSON
 # Output
 {
     "app": {
