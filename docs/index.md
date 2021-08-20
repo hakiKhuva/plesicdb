@@ -322,6 +322,7 @@ return database, memory, stats.json memory, collections, collection-chunks count
 
 Plesic methods
 ================
+
 method | description | args | args type | return
 ---------|-----------|-------|------------|---------
 IMPORT | Create new database from exported database JSON file | filename_with_path | str | None
