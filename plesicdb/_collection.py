@@ -20,6 +20,7 @@ class Collection:
             update       : update record(s)
             exists       : check if record exists or not
     """
+    _busy = False
 
     def __init__(self,**kwargs) -> None:
         self.__name = kwargs["name"]
@@ -127,54 +128,62 @@ class Collection:
                 )
             del statsdata
 
-        pointer = open(pathToCollection,"r+")
-        pointer.seek(0)
-        try:
-            _data = json.loads(pointer.read())
+
+        _data = self.__manage(runningCollection, 'r')
+        # pointer = open(pathToCollection,"r+")
+        # pointer.seek(0)
+        # try:
+            # _data = json.loads(pointer.read())
         # if user replaced file with another format
-        except json.decoder.JSONDecodeError:
-            _done = 0
-            for _ in range(5):
-                try:
-                    pointer.seek(0)
-                    _data = json.loads(pointer.read())
-                except json.decoder.JSONDecodeError:
-                    continue
-                else:
-                    _done = 1
-                    break
+        # except json.decoder.JSONDecodeError:
+        #     _done = 0
+        #     for _ in range(5):
+        #         try:
+        #             pointer.seek(0)
+        #             _data = json.loads(pointer.read())
+        #         except json.decoder.JSONDecodeError:
+        #             continue
+        #         else:
+        #             _done = 1
+        #             break
 
-            if _done != 1:
-                raise ValueError(
-                    "Cannot get data from file [Invalid JSON data]."
-                ) from None
+        #     if _done != 1:
+        #         raise ValueError(
+        #             "Cannot get data from file [Invalid JSON data]."
+        #         ) from None
 
 
-        try:
-            # appending insert data
-            _data.get(self.__name).append(data)
-        except AttributeError:
-            raise ValueError(
-                "Cannot get data from stats."
-            ) from None
+        # try:
+        #     # appending insert data
+        #     _data.get(self.__name).append(data)
+        # except AttributeError:
+        #     print(_data)
+        #     raise ValueError(
+        #         "Cannot get data from stats."
+        #     ) from None
 
-        try:
-            pointer.seek(0)
-            # writing changes
-            try:
-                pointer.write(json.dumps(_data))
-            except FileNotFoundError:
-                raise FileNotFoundError(
-                    "Unable to write changes to file."
-                ) from None
 
-            pointer.truncate()
-        except TypeError as e:
-            raise TypeError(
-                "Insert Error : Cannot convert data in JSON format."
-            ) from None
+        # appending insert data
+        _data.append(data)
 
-        return data.get("_id")
+        self.__manage(runningCollection, "w", data=_data)
+        # try:
+        #     pointer.seek(0)
+        #     # writing changes
+        #     try:
+        #         pointer.write(json.dumps(_data))
+        #     except FileNotFoundError:
+        #         raise FileNotFoundError(
+        #             "Unable to write changes to file."
+        #         ) from None
+
+        #     pointer.truncate()
+        # except TypeError as e:
+        #     raise TypeError(
+        #         "Insert Error : Cannot convert data in JSON format."
+        #     ) from None
+
+        return data.pop("_id")
 
 
     def insertMany(self, data: list) -> list:
@@ -278,6 +287,12 @@ class Collection:
             collection manage to read and write chunks
         """
         if mode == "r":
+            # Busy check --------
+            while self._busy:
+                continue
+
+            self._busy = True
+
             try:
                 with open(os.path.join(self.__dbPath,self.__dbName,chunk+".json"), "r") as f:
                     data = f.read()
@@ -287,7 +302,7 @@ class Collection:
                         _done = 0
                         for _ in range(5):
                             try:
-                                f.seek()
+                                f.seek(0)
                                 data = f.read()
                                 data = json.loads(data)
                             except json.decoder.JSONDecodeError:
@@ -296,15 +311,27 @@ class Collection:
                                 _done = 1
                                 break
                         if _done != 1:
+                            self._busy = False
                             raise ValueError(
                                 "Collection chunk contains invalid JSON data."
                             ) from None
+                    
+                    self._busy = False
+
                     return data.get(self.__name)
             except FileNotFoundError:
+                self._busy = False
                 raise FileNotFoundError(
                     "Unable to read collection-chunk."
                 ) from None
+
         elif mode == "w":
+            # Busy check --------
+            while self._busy:
+                continue
+
+            self._busy = True
+
             try:
                 with open(os.path.join(self.__dbPath,self.__dbName,chunk+".json"), "r+") as f:
                     f.seek(0)
@@ -313,15 +340,18 @@ class Collection:
                             self.__name : data
                         }))
                     except TypeError:
+                        self._busy = False
                         raise TypeError(
                             "Cannot convert data into JSON."
                         ) from None
                     f.truncate()
             except FileNotFoundError:
+                self._busy = False
                 raise FileNotFoundError(
                     "Unable to write changes to collection-chunk."
                 ) from None
 
+            self._busy = False
 
 
     def remove(self,exp :types.LambdaType = None) -> list:

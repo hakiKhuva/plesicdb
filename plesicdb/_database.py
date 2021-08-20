@@ -20,6 +20,9 @@ class Database:
 
     __CPU_CORES = multiprocessing.cpu_count()
 
+    # Busy
+    _busy = False
+
     # default chunk size
     __chunkSize = 2*__CPU_CORES
 
@@ -71,20 +74,32 @@ class Database:
         """
             stats.json document manage function
         """
+        while self._busy:
+            continue
+
         if(mode == "w"):
+            self._busy = True
+
             self.__statsPointer.seek(0)
             try:
                 self.__statsPointer.write(json.dumps(data))
             except FileNotFoundError:
+                self._busy = False
                 raise Exception(
                     "Unable to access stats file - may be database has been removed."
                 )
+
             self.__statsPointer.truncate()
+            self._busy = False
+
         elif(mode == "r"):
+            self._busy = True
+
             self.__statsPointer.seek(0)
             try:
-                return json.loads(self.__statsPointer.read())
+                statsData = json.loads(self.__statsPointer.read())
             except FileNotFoundError:
+                self._busy = False
                 raise Exception(
                     "Unable to access stats file - may be database has been removed."
                 )
@@ -93,8 +108,9 @@ class Database:
                 for _ in range(5):
                     self.__statsPointer.seek(0)
                     try:
-                        return json.loads(self.__statsPointer.read())
+                        statsData = json.loads(self.__statsPointer.read())
                     except FileNotFoundError:
+                        self._busy = False
                         raise Exception(
                             "Unable to access stats file - may be database has been removed."
                         )
@@ -105,10 +121,12 @@ class Database:
                         break
 
                 if _doneAtAll == 0:
+                    self._busy = False
                     raise ValueError(
                         "Unable to get database data - stats file manually modified."
                     )
-
+            self._busy = False
+            return statsData
 
 
     def __getitem__(self, collectionName:str):

@@ -30,5 +30,6 @@ If you want to change chunksize you need to set it before you get the collection
 
 from ._base import Plesic
 from .__about__ import __name__, __version__, __author__, __author_email__, __license__
+from ._utils import date
 
-__all__ = ('Plesic',)
+__all__ = ('Plesic','date')
