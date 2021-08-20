@@ -1,0 +1,49 @@
+<head>
+    <link rel="stylesheet" href="static/css/index.css">
+    <link rel="stylesheet" href="static/css/main.css">
+    <meta name="viewport" content="width=device-width">
+    <title>PlesicDB - v1.0.0</title>
+</head>
+<body>
+    <h1 id="plesicdb">PlesicDB</h1>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="usage.html">Usage</a></li>
+        <li><a href="changelog.html">Change log</a></li>
+    </ul>
+<h1 id="v1-0-0-functions">v1.0.0</h1>
+<ul>
+<li>Added date function to save date and datetime object in JSON format.</li>
+<li>Added busy property to database and collection so there is low chance of getting json decoder error</li>
+<li>Forgot to add value in f.seek - line 290 - v0.0.1.</li>
+</ul>
+<h2 id="date-function">date function</h2>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; from plesicdb import Plesic, date
+<span class="hljs-meta">&gt;&gt;</span>&gt; from datetime import datetime
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; pl = Plesic(<span class="hljs-string">"/home/mydbs"</span>)
+<span class="hljs-meta">&gt;&gt;</span>&gt; db = pl[<span class="hljs-string">"myapp"</span>]
+<span class="hljs-meta">&gt;&gt;</span>&gt; users = db[<span class="hljs-string">"users"</span>]
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; record = {
+<span class="hljs-string">"name"</span> : <span class="hljs-string">"Haki"</span>,
+<span class="hljs-string">"account created date"</span> : date(datetime.now())
+}
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># record will be</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># {</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#    "name": "Haki",</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#    "account created date": {</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "year": 2021,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "month": 8,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "day": 20,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "hour": 9,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "minute": 13,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "second": 17,</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#        "m_second": 858142</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment">#    }</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># }</span>
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.insert(record)
+</code></pre>
+
+</body>

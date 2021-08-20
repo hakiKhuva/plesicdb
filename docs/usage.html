@@ -1,0 +1,343 @@
+<head>
+    <link rel="stylesheet" href="static/css/index.css">
+    <link rel="stylesheet" href="static/css/main.css">
+    <meta name="viewport" content="width=device-width">
+    <title>PlesicDB - Usage</title>
+</head>
+<body>
+<h1 id="plesicdb">PlesicDB</h1>
+<ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="changelog.html">Change log</a></li>
+</ul>
+
+<h1 id="usage">Usage</h1>
+<p>Below is an example of how to import plesicdb and creating database and collection.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; from plesicdb import Plesic
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; pl = Plesic(<span class="hljs-string">"/home/mydbs"</span>)   <span class="hljs-comment"># directory to store all databases in it.</span>
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; db = pl[<span class="hljs-string">"myapp"</span>]             <span class="hljs-comment"># Getting database</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; db.chunksize = <span class="hljs-number">16</span>            <span class="hljs-comment"># This will work</span>
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users = db[<span class="hljs-string">"users"</span>]          <span class="hljs-comment"># Users collection</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; db.chunksize = <span class="hljs-number">16</span>            <span class="hljs-comment"># This won't work</span>
+</code></pre>
+<p>If you want to change <code>chunksize</code> you need to set it before you get the collection.</p>
+<h2 id="insert-record">Insert record</h2>
+<p>When you insert record in collection function will return <code>_id</code> of record.</p>
+<p>If <code>_id</code> provided in <code>dict</code> then it will be used else uuid4 function will be used.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># Using users collection</span>
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; insertdata = {
+    <span class="hljs-string">"name"</span> : <span class="hljs-string">"Abc def"</span>,
+    <span class="hljs-string">"info"</span> : {
+        <span class="hljs-string">"email"</span> : None,
+        <span class="hljs-string">"addr"</span> : {
+            <span class="hljs-string">"country"</span> : <span class="hljs-string">"India"</span>
+        }
+    }
+}
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; _id = users.insert(insertdata) <span class="hljs-comment"># storing id of record in _id variable</span>
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; print(<span class="hljs-string">"record id :"</span>,_id)
+</code></pre>
+<pre><code><span class="hljs-comment"># Output</span>
+<span class="hljs-built_in">record</span> <span class="hljs-built_in">id</span> : <span class="hljs-number">15</span>c99800-f480<span class="hljs-number">-4099</span><span class="hljs-number">-948</span>c-b6e409edcefd
+</code></pre><h2 id="to-insert-multiple-records">To insert multiple records</h2>
+<p>When you insert multiple records in collection function will return <code>_id list</code>.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; import random
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; insertdata = [
+    {
+        <span class="hljs-string">"name"</span> : <span class="hljs-string">"Abc def"</span>,
+        <span class="hljs-string">"age"</span> :  random.randint(<span class="hljs-number">15</span>,<span class="hljs-number">25</span>)
+    },
+    {
+        <span class="hljs-string">"name"</span> : <span class="hljs-string">"Ghi jkl"</span>,
+        <span class="hljs-string">"age"</span> :  random.randint(<span class="hljs-number">15</span>,<span class="hljs-number">25</span>)
+    },
+    {
+        <span class="hljs-string">"name"</span> : <span class="hljs-string">"Mno pqr"</span>,
+        <span class="hljs-string">"age"</span> :  random.randint(<span class="hljs-number">15</span>,<span class="hljs-number">25</span>)
+    }
+]
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.insertMany(insertdata)
+</code></pre>
+<pre><code># Output
+['d0d66f10-d50f<span class="hljs-number">-48</span>fc<span class="hljs-number">-8779</span>-ee2a12965b19', '<span class="hljs-number">719</span>bacc7<span class="hljs-number">-7</span>be0<span class="hljs-number">-43</span>d2<span class="hljs-number">-985</span>a<span class="hljs-number">-36309</span>fe38142', '<span class="hljs-number">4</span>d1a2dd6-f5d4<span class="hljs-number">-4</span>ceb-af8d-b495cde22e7d']
+</code></pre><h2 id="search-records">Search records</h2>
+<p>When you search for record pass lambda function or regular function that returns true.</p>
+<p>To get all records call without passing function.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; users.find(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"_id"</span>] == <span class="hljs-string">'15c99800-f480-4099-948c-b6e409edcefd'</span>)
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># To get all records - users.find()</span>
+</code></pre>
+<pre><code><span class="hljs-comment"># Output</span>
+[{<span class="hljs-string">'name'</span>: <span class="hljs-string">'Abc def'</span>, <span class="hljs-string">'info'</span>: {<span class="hljs-string">'email'</span>: <span class="hljs-keyword">None</span>, <span class="hljs-string">'addr'</span>: {<span class="hljs-string">'country'</span>: <span class="hljs-string">'India'</span>}}, <span class="hljs-string">'_id'</span>: <span class="hljs-string">'15c99800-f480-4099-948c-b6e409edcefd'</span>}]
+</code></pre><h2 id="remove-records">Remove records</h2>
+<p>If you want to clear all records from collection call without passing function.</p>
+<p>Pass lambda or regular function that returns true.</p>
+<p>Function will return list of <code>_id</code> of removed records.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># truncate collection</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.remove()
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; <span class="hljs-comment"># remove specific records</span>
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.remove(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"_id"</span>] == <span class="hljs-string">'15c99800-f480-4099-948c-b6e409edcefd'</span>)
+</code></pre>
+<pre><code># Output
+['<span class="hljs-number">15</span>c99800-f480<span class="hljs-number">-4099</span><span class="hljs-number">-948</span>c-b6e409edcefd']
+</code></pre><h2 id="update-records">Update records</h2>
+<p>Update records will return <code>_id</code> of updated records.</p>
+<p>Pass lambda or regular function that returns true.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; users.update(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"_id"</span>] == <span class="hljs-string">'d0d66f10-d50f-48fc-8779-ee2a12965b19'</span>,{<span class="hljs-string">"name"</span> : <span class="hljs-string">"Stu vw"</span>})
+</code></pre>
+<pre><code><span class="hljs-meta"># Output</span>
+[<span class="hljs-string">'d0d66f10-d50f-48fc-8779-ee2a12965b19'</span>]
+</code></pre><h2 id="update-records-nested-dict">Update records - nested dict</h2>
+<p>If you have added data in nested format then you can update it using <code>.</code>(dot) as shown below.</p>
+<p>If key doesn&#39;t exists it will be created.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; record = {
+    <span class="hljs-string">"name"</span> : <span class="hljs-string">"Haki"</span>,
+    <span class="hljs-string">"info"</span> : {
+        <span class="hljs-string">"addr"</span> : {
+            <span class="hljs-string">"country"</span> : None
+        }
+    },
+    <span class="hljs-string">"_id"</span> : <span class="hljs-number">1</span>
+}
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.insert(record)
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.update(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"_id"</span>] == <span class="hljs-number">1</span>,{<span class="hljs-string">"info.addr.country"</span> : <span class="hljs-string">"India"</span>})
+</code></pre>
+<h2 id="check-record-exists-or-not">Check record exists or not</h2>
+<p>This function will return 1 if exists else 0.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; records = [
+    {
+        <span class="hljs-string">"username"</span> : <span class="hljs-string">"user1"</span>,
+        <span class="hljs-string">"password"</span> : <span class="hljs-string">'25d55ad283aa400af464c76d713c07ad'</span> <span class="hljs-comment"># 12345678</span>
+    },
+    {
+        <span class="hljs-string">"username"</span> : <span class="hljs-string">"user2"</span>,
+        <span class="hljs-string">"password"</span> : <span class="hljs-string">'81dc9bdb52d04dc20036dbd8313ed055'</span> <span class="hljs-comment"># 1234</span>
+    },
+    {
+        <span class="hljs-string">"username"</span> : <span class="hljs-string">"user3"</span>,
+        <span class="hljs-string">"password"</span> : <span class="hljs-string">'6531401f9a6807306651b87e44c05751'</span> <span class="hljs-comment"># 09876</span>
+    }
+]
+
+<span class="hljs-meta">&gt;&gt;</span>&gt; users.insertMany(records)
+</code></pre>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; users.exists(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"username"</span>] == <span class="hljs-string">"user1"</span>)
+</code></pre>
+<pre><code><span class="hljs-meta"># Output</span>
+<span class="hljs-number">1</span>
+</code></pre><pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; users.exists(lambda <span class="hljs-symbol">x:</span>x[<span class="hljs-string">"username"</span>] == <span class="hljs-string">"user10"</span>)
+</code></pre>
+<pre><code><span class="hljs-meta"># Output</span>
+<span class="hljs-number">0</span>
+</code></pre><h2 id="drop-collection">Drop collection</h2>
+<p>return 1 if dropped else 0</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; db.drop(<span class="hljs-string">"users"</span>)
+</code></pre>
+<pre><code><span class="hljs-meta"># Output</span>
+<span class="hljs-number">1</span>
+</code></pre><h2 id="export-database">Export database</h2>
+<p>Export database to one JSON file.</p>
+<p>JSON file will be generated at path with db data.</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; db.export(<span class="hljs-string">"/home/mydbs/"</span>)
+</code></pre>
+<h2 id="import-database">Import database</h2>
+<p>Import database that exported before</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; pl.IMPORT(<span class="hljs-string">"/home/mydbs/myapp--7cf27d12adadbb2778e04b7a98097c84.json"</span>)
+</code></pre>
+<h2 id="drop-database">Drop database</h2>
+<p>return 1 if dropped else 0</p>
+<pre><code class="lang-python"><span class="hljs-meta">&gt;&gt;</span>&gt; pl.drop(<span class="hljs-string">"myapp"</span>)
+</code></pre>
+<pre><code><span class="hljs-meta"># Output</span>
+<span class="hljs-number">1</span>
+</code></pre><h2 id="get-info-about-your-databases">Get info about your databases</h2>
+<p>return database, memory, stats.json memory, collections, collection-chunks count, memory</p>
+<pre><code class="lang-python">&gt;&gt;&gt; import json
+&gt;&gt;&gt; print(<span class="hljs-name">json</span>.dumps(<span class="hljs-name">pl</span>.info(),indent=4))
+</code></pre>
+<pre><code class="lang-JSON"># <span class="hljs-symbol">Output</span>
+{
+    <span class="hljs-string">"app"</span>: {
+        <span class="hljs-string">"created"</span>: <span class="hljs-string">"2021-08-09T10:34:55.244625"</span>,
+        <span class="hljs-string">"memory"</span>: <span class="hljs-number">4150488</span>,
+        <span class="hljs-string">"collections"</span>: [
+            <span class="hljs-string">"users"</span>,
+            <span class="hljs-string">"data"</span>
+        ],
+        <span class="hljs-string">"data"</span>: {
+            <span class="hljs-string">"users"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">996</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">4150476</span>
+            },
+            <span class="hljs-string">"data"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">1</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">12</span>
+            }
+        },
+        <span class="hljs-string">"statsMemory"</span>: <span class="hljs-number">35937</span>
+    },
+    <span class="hljs-string">"test"</span>: {
+        <span class="hljs-string">"created"</span>: <span class="hljs-string">"2021-08-09T14:14:50.644847"</span>,
+        <span class="hljs-string">"memory"</span>: <span class="hljs-number">19464728</span>,
+        <span class="hljs-string">"collections"</span>: [
+            <span class="hljs-string">"data"</span>
+        ],
+        <span class="hljs-string">"data"</span>: {
+            <span class="hljs-string">"data"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">4668</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">19464728</span>
+            }
+        },
+        <span class="hljs-string">"statsMemory"</span>: <span class="hljs-number">168070</span>
+    },
+    <span class="hljs-string">"chat-app"</span>: {
+        <span class="hljs-string">"created"</span>: <span class="hljs-string">"2021-08-11T11:34:39.070612"</span>,
+        <span class="hljs-string">"memory"</span>: <span class="hljs-number">2165</span>,
+        <span class="hljs-string">"collections"</span>: [
+            <span class="hljs-string">"users"</span>,
+            <span class="hljs-string">"openchats"</span>,
+            <span class="hljs-string">"openchat"</span>
+        ],
+        <span class="hljs-string">"data"</span>: {
+            <span class="hljs-string">"users"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">1</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">1244</span>
+            },
+            <span class="hljs-string">"openchats"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">1</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">921</span>
+            },
+            <span class="hljs-string">"openchat"</span>: {
+                <span class="hljs-string">"chunk_count"</span>: <span class="hljs-number">0</span>,
+                <span class="hljs-string">"memory"</span>: <span class="hljs-number">0</span>
+            }
+        },
+        <span class="hljs-string">"statsMemory"</span>: <span class="hljs-number">150</span>
+    },
+    <span class="hljs-string">"totalMemory"</span>: <span class="hljs-number">23821538</span>
+}
+</code></pre>
+<h1 id="plesic-methods">Plesic methods</h1>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th>description</th>
+<th>args</th>
+<th>args type</th>
+<th>return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IMPORT</td>
+<td>Create new database from exported database JSON file</td>
+<td>filename_with_path</td>
+<td>str</td>
+<td>None</td>
+</tr>
+<tr>
+<td>drop</td>
+<td>drop database</td>
+<td>databaseName</td>
+<td>str</td>
+<td>1 or 0</td>
+</tr>
+</tbody>
+</table>
+<h1 id="database-methods">Database methods</h1>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th>description</th>
+<th>args</th>
+<th>args type</th>
+<th>return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>drop</td>
+<td>drop collection</td>
+<td>collection</td>
+<td>str</td>
+<td>1 or 0</td>
+</tr>
+<tr>
+<td>export</td>
+<td>export database to single JSON file</td>
+<td>destination</td>
+<td>str</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<h1 id="collection-methods">Collection methods</h1>
+<table>
+<thead>
+<tr>
+<th>method</th>
+<th>description</th>
+<th>args</th>
+<th>args type</th>
+<th>return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>insert</td>
+<td>Insert record</td>
+<td>data</td>
+<td>dict</td>
+<td>id of record</td>
+</tr>
+<tr>
+<td>insertMany</td>
+<td>Insert multiple records</td>
+<td>data</td>
+<td>list</td>
+<td>id of records in list</td>
+</tr>
+<tr>
+<td>find</td>
+<td>search records in collection</td>
+<td>exp</td>
+<td>lambda/ regular function or None</td>
+<td>list of records</td>
+</tr>
+<tr>
+<td>exists</td>
+<td>check record exists or not</td>
+<td>exp</td>
+<td>lambda/ regular function</td>
+<td>1 or 0</td>
+</tr>
+<tr>
+<td>remove</td>
+<td>remove records</td>
+<td>exp</td>
+<td>lambda/ regular function</td>
+<td>list of removed records&#39; id</td>
+</tr>
+<tr>
+<td>update</td>
+<td>update records</td>
+<td>exp, data</td>
+<td>lambda/ regular function, dict</td>
+<td>list of updated records&#39; id</td>
+</tr>
+</tbody>
+</table>
+</body>
