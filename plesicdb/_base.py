@@ -179,7 +179,7 @@ class Plesic:
         """
             IMPORT exported JSON database file
             ==================================
-            
+
             Args:
                 filename_with_path : file that contains exported data
         """
@@ -282,3 +282,12 @@ class Plesic:
         returndata["totalMemory"] = totalMemory
 
         return returndata
+
+
+
+    def __repr__(self):
+        return(
+        "<"
+        f"Plesic databaseDir=\"{self.__dbDir}\""
+        ">"
+        )

@@ -233,3 +233,13 @@ class Database:
             raise PermissionError(
                 "Cannot save the document : Permission denied"
             ) from None
+
+
+    def __repr__(self):
+        return (
+            "<"
+            f"Database name=\"{self.__name}\" "
+            f"path=\"{self.__dbPath}\" "
+            f"chunksize={self.__chunkSize}"
+            ">"
+        )

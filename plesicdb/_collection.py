@@ -21,7 +21,7 @@ class Collection:
             exists       : check if record exists or not
     """
     _busy = False
-
+    __read_attempt = 250
     def __init__(self,**kwargs) -> None:
         self.__name = kwargs["name"]
         self.__dbPath = kwargs["dbStats"][0]
@@ -77,6 +77,8 @@ class Collection:
                     "Record _id cannot be same!"
                 )
 
+        while self._busy:
+            continue
         # getting running collection which means last
         try:
             runningCollection = self.__chunks[-1]
@@ -130,58 +132,11 @@ class Collection:
 
 
         _data = self.__manage(runningCollection, 'r')
-        # pointer = open(pathToCollection,"r+")
-        # pointer.seek(0)
-        # try:
-            # _data = json.loads(pointer.read())
-        # if user replaced file with another format
-        # except json.decoder.JSONDecodeError:
-        #     _done = 0
-        #     for _ in range(5):
-        #         try:
-        #             pointer.seek(0)
-        #             _data = json.loads(pointer.read())
-        #         except json.decoder.JSONDecodeError:
-        #             continue
-        #         else:
-        #             _done = 1
-        #             break
-
-        #     if _done != 1:
-        #         raise ValueError(
-        #             "Cannot get data from file [Invalid JSON data]."
-        #         ) from None
-
-
-        # try:
-        #     # appending insert data
-        #     _data.get(self.__name).append(data)
-        # except AttributeError:
-        #     print(_data)
-        #     raise ValueError(
-        #         "Cannot get data from stats."
-        #     ) from None
-
 
         # appending insert data
         _data.append(data)
 
         self.__manage(runningCollection, "w", data=_data)
-        # try:
-        #     pointer.seek(0)
-        #     # writing changes
-        #     try:
-        #         pointer.write(json.dumps(_data))
-        #     except FileNotFoundError:
-        #         raise FileNotFoundError(
-        #             "Unable to write changes to file."
-        #         ) from None
-
-        #     pointer.truncate()
-        # except TypeError as e:
-        #     raise TypeError(
-        #         "Insert Error : Cannot convert data in JSON format."
-        #     ) from None
 
         return data.pop("_id")
 
@@ -229,35 +184,13 @@ class Collection:
                 f"Cannot find records with expression type {type(exp).__name__}."
             )
 
+        while self._busy:
+            continue
         # if exp is None return all records
         if exp == None:
             records = []
             for chunk in self.__chunks:
-                # pathToCollection = os.path.join(self.__dbPath,self.__dbName,chunk+".json")
-                # try:
-                    # data = json.loads(open(pathToCollection,"r+").read())
                 data = self.__manage(chunk, "r")
-                # except FileNotFoundError:
-                #     raise FileNotFoundError(
-                #         "Unable to open collection chunk."
-                #     ) from None
-                # except json.decoder.JSONDecodeError:
-                #     _done = 0
-                #     for _ in range(5):
-                #         try:
-                #             data = json.loads(open(pathToCollection,"r+").read())
-                #         except json.decoder.JSONDecodeError:
-                #             continue
-                #         else:
-                #             _done = 1
-                #             break
-
-                #     if _done != 1:
-                #         raise ValueError(
-                #             "Invalid JSON data - collection chunk modified manually."
-                #         ) from None
-
-                # records += data.get(self.__name)
                 records += data
             return records
 
@@ -281,6 +214,22 @@ class Collection:
         return result
 
 
+    @property
+    def read_attempt(self):
+        """
+            read_attempt is maximum number to read collection chunk if json.decoder.JSONDecodeError raised.
+        """
+        return self.__read_attempt
+
+
+    @read_attempt.setter
+    def read_attempt(self,new_val):
+        if type(new_val) not in (int,):
+            raise TypeError("read_attempt value must be an integer.")
+        if new_val < 25:
+            raise ValueError("read_attempt value must be greater than 25.")
+        self.__read_attempt = new_val
+
 
     def __manage(self, chunk, mode, data=None):
         """
@@ -300,7 +249,7 @@ class Collection:
                         data = json.loads(data)
                     except json.decoder.JSONDecodeError:
                         _done = 0
-                        for _ in range(5):
+                        for _ in range(self.__read_attempt):
                             try:
                                 f.seek(0)
                                 data = f.read()
@@ -315,7 +264,7 @@ class Collection:
                             raise ValueError(
                                 "Collection chunk contains invalid JSON data."
                             ) from None
-                    
+
                     self._busy = False
 
                     return data.get(self.__name)
@@ -334,8 +283,8 @@ class Collection:
 
             try:
                 with open(os.path.join(self.__dbPath,self.__dbName,chunk+".json"), "r+") as f:
-                    f.seek(0)
                     try:
+                        f.seek(0)
                         f.write(json.dumps({
                             self.__name : data
                         }))
@@ -344,7 +293,8 @@ class Collection:
                         raise TypeError(
                             "Cannot convert data into JSON."
                         ) from None
-                    f.truncate()
+                    else:
+                        f.truncate()
             except FileNotFoundError:
                 self._busy = False
                 raise FileNotFoundError(
@@ -373,6 +323,8 @@ class Collection:
                 f"Cannot find records with expression type {type(exp).__name__}."
             )
 
+        while self._busy:
+            continue
         # truncate collection
         if exp == None:
             for chunk in self.__chunks:
@@ -421,12 +373,6 @@ class Collection:
                     os.remove(os.path.join(self.__dbPath,self.__dbName,chunk+".json"))
                 else:
                     self.__manage(chunk,"w",_data)
-                    # with open(os.path.join(self.__dbPath,self.__dbName,chunk+".json"),"r+") as f:
-                    #     f.seek(0)
-                    #     f.write(json.dumps({
-                    #         self.__name : _data
-                    #     }))
-                    #     f.truncate()
         return result
 
 
@@ -473,6 +419,9 @@ class Collection:
             raise TypeError(
                 f"Cannot find records with expression type {type(exp).__name__}."
             )
+
+        while self._busy:
+            continue
 
         # getting all keys, values of update data
         keys = [key.split(".") for key in update_data.keys()]
@@ -542,6 +491,8 @@ class Collection:
             raise TypeError(
                 f"Cannot find records with expression type {type(exp).__name__}."
             )
+        while self._busy:
+            continue
         chunks = self.__chunks
         for chunk in chunks:
             _data = self.__manage(chunk, "r")
@@ -552,3 +503,13 @@ class Collection:
                 except KeyError:
                     pass
         return 0
+
+
+    def __repr__(self):
+        return(
+            "<"
+            f"Collection name=\"{self.__name}\" "
+            f"database=\"{self.__dbName}\" "
+            f"chunksize={self.__chunkSize}"
+            ">"
+        )
