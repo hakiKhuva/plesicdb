@@ -12,6 +12,28 @@ Every database collection-chunk size is default to (2*CPU_CORES)
 * [Change log](#changelog)
 
 
+v1.0.1
+======
+
+*read_attempt* property
+-----------------------
+
+read_attempt is for how many times a chunk should be read if json.decoder.JSONDecodeError raised
+
+```python
+>>> from plesicdb import Plesic, date
+>>> from datetime import datetime
+
+>>> pl = Plesic("/home/mydbs")
+>>> db = pl["myapp"]
+>>> users = db["users"]
+
+>>> # read_attempt default value is 250
+>>> users.read_attempt = 500
+```
+
+
+
 v1.0.0
 ======
 
@@ -389,9 +411,21 @@ remove | remove records | exp | lambda/ regular function | list of removed recor
 update | update records | exp, data | lambda/ regular function, dict | list of updated records' id
 
 
+Properties
+==========
+name | from | description
+-----|------|-------------
+dir | Plesic | dir property to get/set database directory
+chunksize | Database | Chunksize is used to limit collection chunk size
+read_attempt | Collection | read_attempt is maximum number to read collection chunk if json.decoder.JSONDecodeError raised
+
 
 Changelog
 =========
+
+v1.0.1
+------
+* Added read_attempt property
 
 v1.0.0
 ------
