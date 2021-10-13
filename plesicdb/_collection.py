@@ -152,11 +152,11 @@ class Collection:
             Returns:
                 list of record's id
         """
-        _ids = []
         if(type(data) != list):
             raise ValueError("insert_many data must be in list format.")
         if data == []:
-            raise ValueError("Cannot insert empty list.")
+            return []
+        _ids = []
         i = 0
         # adding record one by one
         while i < len(data):

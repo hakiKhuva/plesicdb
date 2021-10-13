@@ -36,7 +36,7 @@ If you want to change `chunksize` you need to set it before you get the collecti
 
 setuptools.setup(
     name="PlesicDB",
-    version="1.0.1",
+    version="1.0.2",
     author="Harkishan Khuva",
     author_email="harkishankhuva02@gmail.com",
     description="Document(JSON) oriented database",

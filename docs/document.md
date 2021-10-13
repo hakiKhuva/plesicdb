@@ -12,6 +12,12 @@ Every database collection-chunk size is default to (2*CPU_CORES)
 * [Change log](#changelog)
 
 
+v1.0.2
+======
+
+removed exception of empty list in `collection` method insertMany.
+
+
 v1.0.1
 ======
 
